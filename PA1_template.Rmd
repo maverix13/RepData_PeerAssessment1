@@ -8,7 +8,7 @@ output:
 
 ## Loading and preprocessing the data
 Following piece of code extracts the zip file in data directory and reads it into activityData variable.
-```{r}
+```{r message=FALSE}
 #system("unzip activity.zip -d data/")
 activityData <- read.csv("data/activity.csv")
 library(dplyr)
@@ -18,25 +18,51 @@ library(ggplot2)
 
 ## What is mean total number of steps taken per day?
 
-```{r results='asis'}
+```{r message=FALSE,results='asis'}
 completeData <- subset(activityData, complete.cases(activityData))
-groupedData <- completeData %>% group_by(date) %>% summarise(steps = mean(steps))
-g <- ggplot(groupedData, aes(date)) + geom_histogram(aes(y = steps), stat = "identity")
-g <- g + theme(axis.text.x = element_text(angle=90))
+dataByDate <- completeData %>% group_by(date) %>% summarise(steps = sum(steps))
+averageSteps <- round(mean(dataByDate$steps), digits = 0)
+medianSteps <- median(dataByDate$steps)
+g <- ggplot(dataByDate, aes(steps)) + geom_histogram(binwidth = 2000) +
+  geom_vline(aes(xintercept=averageSteps), color="red", linetype="dashed", size=1) +
+  xlab("Steps Per Day") + ylab("Frequency") + ggtitle("Histogram: Steps Per Day")
 print(g)
-
-averageSteps <- mean(groupedData$steps)
-medianSteps <- median(groupedData$steps)
 ```
 
 The mean of total number of steps per day is `r averageSteps` and median is `r medianSteps`
 
 ## What is the average daily activity pattern?
-
+```{r message=FALSE,results='asis'}
+dataByInterval <- completeData %>% group_by(interval) %>% summarise(steps = mean(steps))
+maxPoint <- data.frame(dataByInterval[dataByInterval$steps == max(dataByInterval$steps),])
+g <- ggplot(dataByInterval, aes(interval, steps)) + geom_line() +
+  xlab("Interval") + ylab("Average Steps") +
+  geom_point(data = maxPoint, aes(interval, steps), color = "red") +
+  geom_text(data = maxPoint, aes(x = interval * 1.15, y = steps, label = "Max", color = "red")) +
+  theme(legend.position = "none")
+    
+print(g)
+```
 
 
 ## Imputing missing values
+```{r message=FALSE,results='asis'}
+missingData <- activityData[!complete.cases(activityData),]
+numMissing <- length(missingData)
+library(devtools)
+devtools::source_gist("4959237")
+imputedData <- FillIn(activityData, dataByInterval, "steps", "steps", c("interval"))
+imputedDataByDate <- imputedData %>% group_by(date) %>% summarise(steps = sum(steps))
+imputedAverageSteps <- round(mean(imputedDataByDate$steps), digits = 0)
+imputedMedianSteps <- median(imputedDataByDate$steps)
+g <- ggplot(imputedDataByDate, aes(steps)) + geom_histogram(binwidth = 2000) +
+  geom_vline(aes(xintercept=imputedAverageSteps), color="red", linetype="dashed", size=1) +
+  xlab("Steps Per Day") + ylab("Frequency") + ggtitle("Histogram: Steps Per Day")
+print(g)
+```
 
+Total number of missing values: `r dim(missingData)[1]`
 
+The mean of total number of steps per day is `r imputedAverageSteps` and median is `r imputedMedianSteps`
 
 ## Are there differences in activity patterns between weekdays and weekends?
