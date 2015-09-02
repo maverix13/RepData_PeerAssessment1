@@ -1,11 +1,6 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: "Maverix13"
-output: 
-  html_document:
-    keep_md: true
----
 
+Reproducible Research: Peer Assessment 1
+========================================
 
 ## Loading and preprocessing the data
 Following piece of code extracts the zip file in data directory and reads it into activityData variable.
