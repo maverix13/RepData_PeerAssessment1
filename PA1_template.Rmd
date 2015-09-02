@@ -1,5 +1,6 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "Maverix13"
 output: 
   html_document:
     keep_md: true
@@ -13,6 +14,7 @@ Following piece of code extracts the zip file in data directory and reads it int
 activityData <- read.csv("data/activity.csv")
 library(dplyr)
 library(ggplot2)
+dim(activityData)
 ```
 
 
@@ -27,7 +29,10 @@ g <- ggplot(dataByDate, aes(steps)) + geom_histogram(binwidth = 2000) +
   geom_vline(aes(xintercept=averageSteps), color="red", linetype="dashed", size=1) +
   xlab("Steps Per Day") + ylab("Frequency") + ggtitle("Histogram: Steps Per Day")
 print(g)
+options(scipen=999)
 ```
+
+Note: This is a historgram as opposed to a bar plot clearly showing frequency of distribution.
 
 The mean of total number of steps per day is `r averageSteps` and median is `r medianSteps`
 
@@ -44,13 +49,13 @@ g <- ggplot(dataByInterval, aes(interval, steps)) + geom_line() +
 print(g)
 ```
 
+As the above graph shows, 5-minute interval with maximum steps is `r maxPoint[1]`
 
 ## Imputing missing values
-```{r message=FALSE,results='asis'}
+```{r warning=FALSE,message=FALSE,results='asis'}
 missingData <- activityData[!complete.cases(activityData),]
 numMissing <- length(missingData)
-library(devtools)
-devtools::source_gist("4959237")
+source("FillIn.R")
 imputedData <- FillIn(activityData, dataByInterval, "steps", "steps", c("interval"))
 imputedDataByDate <- imputedData %>% group_by(date) %>% summarise(steps = sum(steps))
 imputedAverageSteps <- round(mean(imputedDataByDate$steps), digits = 0)
@@ -65,4 +70,23 @@ Total number of missing values: `r dim(missingData)[1]`
 
 The mean of total number of steps per day is `r imputedAverageSteps` and median is `r imputedMedianSteps`
 
+The impact of imputing missing data is not visible on mean value given that mean calculated per interval is used to impute missing values. Median did change towards a slightly lower value.
+
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r message=FALSE,results='asis'}
+library(lubridate)
+imputedData$day <- as.factor(ifelse(weekdays(ymd(imputedData$date)) %in% c("Saturday","Sunday"), "Weekend", "Weekday"))
+groupByDayInterval <- imputedData %>% group_by(day, interval) %>% summarise(steps = mean(steps))
+g <- ggplot(groupByDayInterval, aes(x = interval, y = steps, color = day)) + geom_line() + facet_wrap(~day, nrow = 2) + 
+  xlab("Interval") + ylab("Average Steps") + ggtitle("Comparison of Average Steps (Weekday vs Weekend)")
+print(g)
+```
+
+One major thing visible is during weekdays there is peak around interval 800, while weekend seems to have a lot more activity throughout the day. Another way to see the difference is by plotting Weekday and Weekend on the same plot.
+
+```{r message=FALSE,results='asis'}
+groupByDayInterval <- imputedData %>% group_by(day, interval) %>% summarise(steps = mean(steps))
+g <- ggplot(groupByDayInterval, aes(x = interval, y = steps, color = day)) + geom_line() +
+  xlab("Interval") + ylab("Average Steps") + ggtitle("Comparison of Average Steps (Weekday vs Weekend)")
+print(g)
+```
