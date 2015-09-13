@@ -32,7 +32,7 @@ g <- ggplot(dataByDate, aes(steps)) + geom_histogram(binwidth = 2000) +
 print(g)
 ```
 
-![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
 ```r
 options(scipen=999)
@@ -56,11 +56,13 @@ g <- ggplot(dataByInterval, aes(interval, steps)) + geom_line() +
 print(g)
 ```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 As the above graph shows, 5-minute interval with maximum steps is 835
 
 ## Imputing missing values
+
+Missing data is filled by the code shown below. Missing data is filled using average steps for a given interval across all dates. 
 
 ```r
 missingData <- activityData[!complete.cases(activityData),]
@@ -76,7 +78,7 @@ g <- ggplot(imputedDataByDate, aes(steps)) + geom_histogram(binwidth = 2000) +
 print(g)
 ```
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 Total number of missing values: 2304
 
@@ -95,7 +97,7 @@ g <- ggplot(groupByDayInterval, aes(x = interval, y = steps, color = day)) + geo
 print(g)
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 One major thing visible is during weekdays there is peak around interval 800, while weekend seems to have a lot more activity throughout the day. Another way to see the difference is by plotting Weekday and Weekend on the same plot.
 
@@ -107,4 +109,4 @@ g <- ggplot(groupByDayInterval, aes(x = interval, y = steps, color = day)) + geo
 print(g)
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 

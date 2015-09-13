@@ -1,3 +1,8 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+---
 
 Reproducible Research: Peer Assessment 1
 ========================================
@@ -47,6 +52,8 @@ print(g)
 As the above graph shows, 5-minute interval with maximum steps is `r maxPoint[1]`
 
 ## Imputing missing values
+
+Missing data is filled by the code shown below. Missing data is filled using average steps for a given interval across all dates. 
 ```{r warning=FALSE,message=FALSE,results='asis'}
 missingData <- activityData[!complete.cases(activityData),]
 numMissing <- length(missingData)
